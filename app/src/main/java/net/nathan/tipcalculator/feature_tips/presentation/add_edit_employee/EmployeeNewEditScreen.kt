@@ -1,10 +1,10 @@
 package net.nathan.tipcalculator.feature_tips.presentation.add_edit_employee
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Save
@@ -15,21 +15,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import net.nathan.tipcalculator.core.presentation.components.CheckButton
 import net.nathan.tipcalculator.core.presentation.components.DeleteButton
+import net.nathan.tipcalculator.core.presentation.components.OutlinedTimePickerButton
+import net.nathan.tipcalculator.core.presentation.components.TimePickerDialog
 import net.nathan.tipcalculator.core.util.ContentDescriptions
 import net.nathan.tipcalculator.core.util.NewEditStrings
 import net.nathan.tipcalculator.core.util.TipStrings
 import net.nathan.tipcalculator.feature_tips.presentation.add_edit_employee.components.HintPositiveNumberField
-import net.nathan.tipcalculator.feature_tips.presentation.add_edit_employee.components.HintTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @ExperimentalMaterial3Api
@@ -42,8 +46,6 @@ fun EmployeeNewEditScreen(
     val state = viewModel.state.value
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val horizontalPadding = 16.dp
-    val verticalPadding = 16.dp
 
     LaunchedEffect(key1 = true){
         viewModel.eventFlow.collectLatest {event ->
@@ -159,38 +161,45 @@ fun EmployeeNewEditScreen(
                     .fillMaxSize()
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
                 ) {
-                    HintTextField(
-                        text = state.employeeEntry.name,
-                        hint = NewEditStrings.NAME_HINT,
-                        textColour = MaterialTheme.colorScheme.onPrimaryContainer,
-                        onValueChange = {
-                            viewModel.onEvent(EmployeeNewEditEvent.EnteredName(it))
+                    OutlinedTextField(
+                        value = state.employeeEntry.name,
+                        onValueChange = {str ->
+                            viewModel.onEvent(EmployeeNewEditEvent.EnteredName(str))
                         },
-                        onFocusChange = {
-                            viewModel.onEvent(EmployeeNewEditEvent.ChangedNameFocus(it))
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .onFocusChanged {
+                                viewModel.onEvent(EmployeeNewEditEvent.ChangedNameFocus(it))
+                            },
+                        textStyle = TextStyle(
+                            fontSize = 40.sp,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                        label = {
+                            Text(NewEditStrings.NAME_HINT)
                         },
                         singleLine = true,
-                        isHintVisible = state.isNameHintVisible,
-                        fontSize = 40.sp,
-                        modifier = Modifier.padding(
-                            horizontal = horizontalPadding,
-                            vertical = verticalPadding
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedBorderColor = MaterialTheme.colorScheme.secondary,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary
                         )
                     )
                 }
-                Divider(Modifier.height(3.dp))
                 if(!state.allowTimeEdit){
                     return@Box
                 }
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
                 ) {
                     HintPositiveNumberField(
                         value = state.employeeEntry.hours,
-                        hint = NewEditStrings.HOURS_HINT,
+                        label = {Text(NewEditStrings.HOURS_HINT)},
                         textColour = MaterialTheme.colorScheme.onPrimaryContainer,
                         onValueChange = {
                             viewModel.onEvent(EmployeeNewEditEvent.EnteredHours(it))
@@ -200,18 +209,17 @@ fun EmployeeNewEditScreen(
                         },
                         singleLine = true,
                         fontSize = 40.sp,
-                        modifier = Modifier.padding(
-                            vertical = verticalPadding
-                            )
-                            .padding(start = horizontalPadding)
-                            .weight(0.5f)
-                    )
-                    Divider(modifier = Modifier
-                        .height(120.dp)
-                        .width(2.dp))
+                        colours = OutlinedTextFieldDefaults.colors(
+                            unfocusedBorderColor = MaterialTheme.colorScheme.secondary,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary
+                        ),
+                        modifier = Modifier.weight(0.5f)
+                            .padding(horizontal = 7.dp)
+                            .padding(bottom = 7.dp)
+                        )
                     HintPositiveNumberField(
                         value = state.employeeEntry.minutes,
-                        hint = NewEditStrings.MINUTES_HINT,
+                        label = {Text(NewEditStrings.MINUTES_HINT)},
                         textColour = MaterialTheme.colorScheme.onPrimaryContainer,
                         onValueChange = {
                             viewModel.onEvent(EmployeeNewEditEvent.EnteredMinutes(it))
@@ -221,88 +229,90 @@ fun EmployeeNewEditScreen(
                         },
                         singleLine = true,
                         fontSize = 40.sp,
-                        modifier = Modifier.padding(
-                            vertical = verticalPadding
-                            )
-                            .padding(start = horizontalPadding)
+                        colours = OutlinedTextFieldDefaults.colors(
+                            unfocusedBorderColor = MaterialTheme.colorScheme.secondary,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary
+                        ),
+                        modifier = Modifier
                             .weight(0.5f)
+                            .padding(horizontal = 7.dp)
+                            .padding(bottom = 7.dp)
                     )
                 }
-                Divider(Modifier.height(3.dp))
                 Row(
-                    modifier = Modifier.fillMaxWidth()
-                        .padding(top = 10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min),
                     horizontalArrangement = Arrangement.Center
                 ){
-                    Button(
+                    OutlinedTimePickerButton(
+                        modifier = Modifier
+                            .padding(horizontal = 19.dp)
+                            .weight(0.5f),
                         onClick = {
-                            viewModel.onEvent(EmployeeNewEditEvent.ShowTimeDialog)
-                        }
-                    ){
-                        Text(
-                            text = TipStrings.ENTER_START_TIME,
-                            style = MaterialTheme.typography.headlineSmall
-                        )
-                    }
+                            viewModel.onEvent(EmployeeNewEditEvent.ShowStartTimeDialog)
+                        },
+                        title = TipStrings.START_TIME,
+                        hour = state.startTimePickerState.hour,
+                        minute = state.startTimePickerState.minute,
+                        titleStyle = MaterialTheme.typography.labelLarge,
+                        titleSize = 20.sp,
+                        titleColour = MaterialTheme.colorScheme.onBackground,
+                        timeSize = 40.sp,
+                        timeColour = MaterialTheme.colorScheme.onPrimaryContainer,
+                        timeStyle = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        shape = RoundedCornerShape(5.dp),
+                        borderColour = MaterialTheme.colorScheme.secondary,
+                        borderWidth = 1.dp
+                    )
+                    OutlinedTimePickerButton(
+                        modifier = Modifier
+                            .padding(horizontal = 19.dp)
+                            .weight(0.5f),
+                        onClick = {
+                            viewModel.onEvent(EmployeeNewEditEvent.ShowEndTimeDialog)
+                        },
+                        title = TipStrings.END_TIME,
+                        hour = state.endTimePickerState.hour,
+                        minute = state.endTimePickerState.minute,
+                        titleStyle = MaterialTheme.typography.labelLarge,
+                        titleSize = 20.sp,
+                        titleColour = MaterialTheme.colorScheme.onBackground,
+                        timeSize = 40.sp,
+                        timeColour = MaterialTheme.colorScheme.onPrimaryContainer,
+                        timeStyle = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        shape = RoundedCornerShape(5.dp),
+                        borderColour = MaterialTheme.colorScheme.secondary,
+                        borderWidth = 1.dp
+                    )
                 }
-                if(state.showTimeDialog) {
-                    Dialog(
-                        onDismissRequest = {
+                // handle time picker dialogues
+                if(state.showStartTimeDialog || state.showEndTimeDialog) {
+                    TimePickerDialog(
+                        onSave = {
+                            viewModel.onEvent(EmployeeNewEditEvent.SaveTimeDialog)
+                        },
+                        onDismiss = {
                             viewModel.onEvent(EmployeeNewEditEvent.HideTimeDialog)
-                        }
-                    ){
-                        Card(
-                            modifier = Modifier
-                                .wrapContentHeight()
-                                .height(IntrinsicSize.Min),
-                            shape = RoundedCornerShape(10.dp),
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
-                                verticalArrangement = Arrangement.Center
-                            ){
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .weight(0.1f),
-                                    horizontalArrangement = Arrangement.Center
-                                ){
-                                    Text(
-                                        text = TipStrings.ENTER_START_TIME,
-                                        style = MaterialTheme.typography.headlineSmall
-                                    )
-                                }
-                                Row(
-                                    horizontalArrangement = Arrangement.Center,
-                                    modifier = Modifier.fillMaxWidth()
-                                        .weight(0.8f)
-                                ){
-                                    TimePicker(
-                                        state = state.timePickerState,
-                                        modifier = Modifier,
-                                        colors = TimePickerDefaults.colors(),
-                                        layoutType = TimePickerLayoutType.Vertical
-                                    )
-                                }
-                                Row(
-                                    horizontalArrangement = Arrangement.Center,
-                                    modifier = Modifier.fillMaxWidth()
-                                        .weight(0.1f)
-                                ){
-                                    Button(
-                                        onClick = {
-                                            viewModel.onEvent(EmployeeNewEditEvent.SaveTimeDialog)
-                                        },
-                                        modifier = Modifier
-                                    ){
-                                        Text(
-                                            text = TipStrings.CONFIRM
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
+                        },
+                        timePickerState = if(state.showStartTimeDialog) state.startTimePickerState else state.endTimePickerState,
+                        header = if (state.showStartTimeDialog) TipStrings.ENTER_START_TIME else TipStrings.ENTER_END_TIME,
+                        cardColors = CardColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            disabledContentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        ),
+                        timePickerColours = TimePickerDefaults.colors(
+                            clockDialColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                            timeSelectorSelectedContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                        ),
+                        headerColour = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 }
             }
         }

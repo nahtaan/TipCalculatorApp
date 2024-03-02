@@ -2,13 +2,18 @@ package net.nathan.tipcalculator.feature_tips.presentation.calculate_tips
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,7 +21,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,10 +35,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import net.nathan.tipcalculator.core.presentation.components.OutlinedTimePickerButton
+import net.nathan.tipcalculator.core.presentation.components.TimePickerDialog
 import net.nathan.tipcalculator.core.util.CalculateTipsStrings
 import net.nathan.tipcalculator.core.util.ContentDescriptions
 import net.nathan.tipcalculator.core.util.TipStrings
-import net.nathan.tipcalculator.core.util.TipUseCaseStrings
+import net.nathan.tipcalculator.feature_tips.presentation.add_edit_employee.EmployeeNewEditEvent
 import net.nathan.tipcalculator.feature_tips.presentation.calculate_tips.components.EmployeeTipAmountCard
 import net.nathan.tipcalculator.feature_tips.presentation.calculate_tips.components.HintDecimalField
 import net.nathan.tipcalculator.feature_tips.presentation.util.Screen
@@ -157,7 +169,8 @@ fun CalculateTipsScreen(
     ) {_ ->
         Box(
             contentAlignment = Alignment.TopStart,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .padding(top = 64.dp)
         ){
             Column(
@@ -174,82 +187,80 @@ fun CalculateTipsScreen(
                     time += state.endTimePickerState.minute
                 }
                 Row(
-                    modifier = Modifier.fillMaxWidth()
-                        .height(IntrinsicSize.Min)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.Center
                 ){
-                    Column(
-                        verticalArrangement = Arrangement.Top,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .weight(0.5f)
-                    ) {
-                        Text(
-                            text = CalculateTipsStrings.TOTAL_TIPS_HEADER,
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            fontSize = 20.sp,
-                            modifier = Modifier
-                                .padding(horizontal = horizontalPadding)
-                                .padding(bottom = 1.dp)
-                        )
-                        Card(
-                            shape = RoundedCornerShape(10.dp)
-                        ) {
-                            HintDecimalField(
+                    val modifier = Modifier
+                        .weight(0.5f)
+                        .padding(horizontal = 19.dp, vertical = 5.dp)
+                    Box(
+                        modifier = modifier
+                            .border(
+                                shape = RoundedCornerShape(5.dp),
+                                width = 1.dp,
+                                color = if(state.isTotalFocused) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                            )
+                    ){
+                        Column(
+                            verticalArrangement = Arrangement.Top,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = modifier.fillMaxWidth()
+                        ){
+                            Text(
+                                text = CalculateTipsStrings.TOTAL_TIPS_HEADER,
+                                style = MaterialTheme.typography.labelLarge,
+                                fontSize = 20.sp,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                            BasicTextField(
                                 value = state.totalTips,
-                                hint = CalculateTipsStrings.TOTAL_TIPS_HINT,
-                                textColour = MaterialTheme.colorScheme.onPrimaryContainer,
                                 onValueChange = {
                                     viewModel.onEvent(CalculateTipsEvent.EnteredTotalTips(it))
                                 },
-                                onFocusChange = {
-                                    viewModel.onEvent(CalculateTipsEvent.ChangedTotalTipsFocus(it))
-                                },
-                                isHintVisible = state.isTotalHintShown,
+                                maxLines = 1,
                                 singleLine = true,
-                                fontSize = 40.sp,
+                                textStyle = TextStyle(
+                                    fontSize = 40.sp,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    fontWeight = FontWeight.Bold,
+                                    textAlign = TextAlign.Center,
+                                ),
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Number
+                                ),
                                 modifier = Modifier
-                                    .width(IntrinsicSize.Min)
-                                    .padding(horizontal = 10.dp)
+                                    .onFocusChanged {
+                                        viewModel.onEvent(CalculateTipsEvent.ChangedTotalTipsFocus(it))
+                                    }
                             )
                         }
                     }
-                    Divider(
-                        modifier = Modifier
-                            .height(96.dp)
-                            .width(2.dp)
-                    )
-                    Column(
-                        verticalArrangement = Arrangement.Top,
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                    OutlinedTimePickerButton(
                         modifier = Modifier
                             .weight(0.5f)
-                    ) {
-                        Text(
-                            text = TipStrings.END_TIME,
-                            style = MaterialTheme.typography.labelLarge,
-                            fontSize = 20.sp,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier
-                                .padding(horizontal = horizontalPadding)
-                        )
-                        Card(
-                            shape = RoundedCornerShape(10.dp),
-                            onClick = {
-                                viewModel.onEvent(CalculateTipsEvent.ShowTimeDialog)
-                            }
-                        ) {
-                            Text(
-                                text = time,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                fontSize = 40.sp,
-                                modifier = Modifier
-                                    .padding(horizontal = 10.dp)
-                            )
-                        }
-                    }
+                            .padding(horizontal = 19.dp, vertical = 5.dp),
+                        onClick = {
+                            viewModel.onEvent(CalculateTipsEvent.ShowTimeDialog)
+                        },
+                        title = TipStrings.END_TIME,
+                        hour = state.endTimeHour,
+                        minute = state.endTimeMinute,
+                        titleStyle = MaterialTheme.typography.labelLarge,
+                        titleSize = 20.sp,
+                        titleColour = MaterialTheme.colorScheme.onBackground,
+                        timeSize = 40.sp,
+                        timeColour = MaterialTheme.colorScheme.onPrimaryContainer,
+                        timeStyle = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        shape = RoundedCornerShape(5.dp),
+                        borderWidth = 1.dp,
+                        borderColour = MaterialTheme.colorScheme.secondary
+                    )
                 }
-                Divider()
+                HorizontalDivider(thickness = 3.dp)
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -292,8 +303,8 @@ fun CalculateTipsScreen(
                                         navController.navigate(
                                             Screen.EmployeeAddEditScreen.route + "?employeeId=${employee.id}" +
                                                     "&allowTimeEdit=${true}" +
-                                                    "&endTimeHour=${state.endTimePickerState.hour}" +
-                                                    "&endTimeMinute=${state.endTimePickerState.minute}"
+                                                    "&endTimeHour=${state.endTimeHour}" +
+                                                    "&endTimeMinute=${state.endTimeMinute}"
                                         )
                                     }
                                 }
@@ -304,63 +315,30 @@ fun CalculateTipsScreen(
             }
         }
         if(state.showEndTimeDialog){
-            Dialog(
-                onDismissRequest = {
+            TimePickerDialog(
+                onSave = {
+                    viewModel.onEvent(CalculateTipsEvent.SaveTimeDialog)
+                },
+                onDismiss = {
                     viewModel.onEvent(CalculateTipsEvent.HideTimeDialog)
-                }
-            ){
-                Card(
-                    modifier = Modifier
-                        .wrapContentHeight()
-                        .height(IntrinsicSize.Min),
-                    shape = RoundedCornerShape(10.dp),
-                ) {
-                    Column(
-                        modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
-                        verticalArrangement = Arrangement.Center
-                    ){
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(0.1f),
-                            horizontalArrangement = Arrangement.Center
-                        ){
-                            Text(
-                                text = TipStrings.ENTER_END_TIME,
-                                style = MaterialTheme.typography.headlineSmall
-                            )
-                        }
-                        Row(
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier.fillMaxWidth()
-                                .weight(0.8f)
-                        ){
-                            TimePicker(
-                                state = state.endTimePickerState,
-                                modifier = Modifier,
-                                colors = TimePickerDefaults.colors(),
-                                layoutType = TimePickerLayoutType.Vertical
-                            )
-                        }
-                        Row(
-                            horizontalArrangement = Arrangement.Center,
-                            modifier = Modifier.fillMaxWidth()
-                                .weight(0.1f)
-                        ){
-                            Button(
-                                onClick = {
-                                    viewModel.onEvent(CalculateTipsEvent.HideTimeDialog)
-                                },
-                                modifier = Modifier
-                            ){
-                                Text(
-                                    text = TipStrings.CONFIRM
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+                },
+                timePickerState = state.endTimePickerState,
+                header = TipStrings.ENTER_END_TIME,
+                cardColors = CardColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    disabledContentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                ),
+                timePickerColours = TimePickerDefaults.colors(
+                    timeSelectorSelectedContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                    timeSelectorUnselectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    timeSelectorUnselectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                    timeSelectorSelectedContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    clockDialColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                ),
+                headerColour = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         }
     }
 }

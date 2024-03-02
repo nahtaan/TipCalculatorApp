@@ -13,7 +13,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.math.BigDecimal
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,7 +33,7 @@ fun EmployeeTipAmountCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 10.dp)
+                .padding(start = 16.dp, top = 5.dp)
         ) {
             Text(
                 text = name,
@@ -50,7 +49,7 @@ fun EmployeeTipAmountCard(
             verticalAlignment = Alignment.Top,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 10.dp)
+                .padding(start = 16.dp)
                 .padding(bottom = 7.dp)
         ) {
             var calcHours = hours

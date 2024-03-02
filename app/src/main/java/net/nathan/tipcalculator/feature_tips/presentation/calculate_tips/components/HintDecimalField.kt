@@ -1,7 +1,6 @@
 package net.nathan.tipcalculator.feature_tips.presentation.calculate_tips.components
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text

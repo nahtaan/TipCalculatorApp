@@ -1,7 +1,10 @@
 package net.nathan.tipcalculator.feature_tips.presentation.add_edit_employee
 
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.*
+import androidx.compose.material3.TimePickerState
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -73,12 +76,12 @@ class EmployeeNewEditViewModel @Inject constructor(
         }
         savedStateHandle.get<Int>("endTimeHour")?.let {hour ->
             _state.value = _state.value.copy(
-                endHour = hour
+                endTimePickerState = TimePickerState(hour, _state.value.endTimePickerState.minute, true)
             )
         }
         savedStateHandle.get<Int>("endTimeMinute")?.let {minute ->
             _state.value = _state.value.copy(
-                endMinute = minute
+                endTimePickerState = TimePickerState(_state.value.endTimePickerState.hour, minute, true)
             )
         }
     }
@@ -181,35 +184,47 @@ class EmployeeNewEditViewModel @Inject constructor(
                 )
             }
             EmployeeNewEditEvent.SaveTimeDialog -> {
-                val startHour = _state.value.timePickerState.hour
-                val startMinute = _state.value.timePickerState.minute
-                val endHour = _state.value.endHour
-                val endMinute = _state.value.endMinute
-                val startDecimalHours = startHour + (startMinute/60.0f)
-                val nowDecimalHours = endHour  + (endMinute/60.0f)
-                val workedDecimalHours = if(startDecimalHours <= nowDecimalHours){
-                    nowDecimalHours-startDecimalHours
-                }else{
-                    24 - (startDecimalHours-nowDecimalHours)
+                val startHour = _state.value.startTimePickerState.hour
+                val startMinute = _state.value.startTimePickerState.minute
+                val endHour = _state.value.endTimePickerState.hour
+                val endMinute = _state.value.endTimePickerState.minute
+                var deltaHours = 0
+                if(endHour > startHour){
+                    deltaHours = endHour - startHour
+                }else if (endHour < startHour){
+                    deltaHours = 24 - (startHour - endHour)
                 }
-                val workedHours = workedDecimalHours.div(1).toInt()
-                val workedMinutes = ((workedDecimalHours-workedHours)*60).div(1).toInt()
+                var deltaMinutes = 0
+                if(endMinute > startMinute){
+                    deltaMinutes = endMinute - startMinute
+                }else if (endMinute < startMinute){
+                    deltaMinutes = 60 - (startMinute - endMinute)
+                    deltaHours -= 1
+                }
                 _state.value = _state.value.copy(
                     employeeEntry = _state.value.employeeEntry.copy(
-                        hours = workedHours,
-                        minutes = workedMinutes
+                        hours = deltaHours,
+                        minutes = deltaMinutes
                     ),
-                    showTimeDialog = false
+                    // Change both the end and start time dialogues as they both will use the same event to save the time values
+                    showStartTimeDialog = false,
+                    showEndTimeDialog = false
                 )
             }
             EmployeeNewEditEvent.HideTimeDialog -> {
                 _state.value = _state.value.copy(
-                    showTimeDialog = false
+                    showStartTimeDialog = false,
+                    showEndTimeDialog = false
                 )
             }
-            EmployeeNewEditEvent.ShowTimeDialog -> {
+            EmployeeNewEditEvent.ShowStartTimeDialog -> {
                 _state.value = _state.value.copy(
-                    showTimeDialog = true
+                    showStartTimeDialog = true
+                )
+            }
+            EmployeeNewEditEvent.ShowEndTimeDialog -> {
+                _state.value = _state.value.copy(
+                    showEndTimeDialog = true
                 )
             }
         }

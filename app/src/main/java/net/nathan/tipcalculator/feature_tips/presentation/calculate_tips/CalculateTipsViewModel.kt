@@ -3,6 +3,7 @@ package net.nathan.tipcalculator.feature_tips.presentation.calculate_tips
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -48,16 +49,33 @@ class CalculateTipsViewModel @Inject constructor(
                 }
             }
             is CalculateTipsEvent.ChangedTotalTipsFocus -> {
-                val shouldShowTotalTipHint = !event.focusState.isFocused && _state.value.totalTips == ""
+                var shouldResetTotal = false
+                var resetValue = _state.value.totalTips
+                if(event.focusState.isFocused && _state.value.totalTips == "0"){
+                    shouldResetTotal = true
+                    resetValue = ""
+                }else if (!event.focusState.isFocused && _state.value.totalTips == ""){
+                    shouldResetTotal = true
+                    resetValue = "0"
+                }
                 _state.value = _state.value.copy(
-                    isTotalHintShown = shouldShowTotalTipHint
+                    isTotalFocused = event.focusState.isFocused,
+                    totalTips = if(shouldResetTotal) resetValue else _state.value.totalTips
                 )
             }
             is CalculateTipsEvent.EnteredTotalTips -> {
-                val str = event.value.filter { it.isDigit() || it == '.' }
+                var str = event.value
+                if(str.contains(".")){
+                    if(!str.replace(".", "").isDigitsOnly()){
+                        return;
+                    }
+                }else if (!str.isDigitsOnly()){
+                    return
+                }
                 if(str.length > 7){ // limit the total characters for the tips value to avoid incorrect values being shown
                     return
                 }
+                str = str.replaceFirst("^0+(?!\$)", "")
                 _state.value = _state.value.copy(
                     totalTips = str
                 )
@@ -76,6 +94,13 @@ class CalculateTipsViewModel @Inject constructor(
             CalculateTipsEvent.ShowTimeDialog -> {
                 _state.value = _state.value.copy(
                     showEndTimeDialog = true
+                )
+            }
+            CalculateTipsEvent.SaveTimeDialog -> {
+                _state.value = _state.value.copy(
+                    endTimeHour = _state.value.endTimePickerState.hour,
+                    endTimeMinute = _state.value.endTimePickerState.minute,
+                    showEndTimeDialog = false
                 )
             }
         }

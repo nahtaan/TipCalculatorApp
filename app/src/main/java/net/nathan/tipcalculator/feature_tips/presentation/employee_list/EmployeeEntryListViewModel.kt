@@ -10,7 +10,6 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import net.nathan.tipcalculator.feature_tips.data.di.IoDispatcher
-import net.nathan.tipcalculator.feature_tips.domain.model.EmployeeEntryItem
 import net.nathan.tipcalculator.feature_tips.domain.use_case.TipUseCases
 import javax.inject.Inject
 

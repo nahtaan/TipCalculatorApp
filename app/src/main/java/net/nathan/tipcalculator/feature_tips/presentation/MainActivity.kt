@@ -8,12 +8,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -21,7 +17,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import dagger.hilt.android.AndroidEntryPoint
-import net.nathan.tipcalculator.core.util.CalculateTipsStrings
 import net.nathan.tipcalculator.feature_tips.presentation.add_edit_employee.EmployeeNewEditScreen
 import net.nathan.tipcalculator.feature_tips.presentation.calculate_tips.CalculateTipsScreen
 import net.nathan.tipcalculator.feature_tips.presentation.employee_list.EmployeeEntriesScreen

@@ -15,11 +15,11 @@ data class EmployeeNewEditState @OptIn(ExperimentalMaterial3Api::class) construc
         isSelected = true,
         id = null
     ),
-    val showTimeDialog: Boolean = false,
+    val showStartTimeDialog: Boolean = false,
+    val showEndTimeDialog: Boolean = false,
     val allowTimeEdit: Boolean = false,
-    val endHour: Int = 0,
-    val endMinute: Int = 0,
-    val timePickerState: TimePickerState = TimePickerState(0,0,true),
+    val endTimePickerState: TimePickerState = TimePickerState(0,0 ,true),
+    val startTimePickerState: TimePickerState = TimePickerState(0,0,true),
     val isEdit: Boolean = false,
     val isLoading: Boolean = false,
     val error: String? = null

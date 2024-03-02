@@ -9,4 +9,5 @@ sealed class CalculateTipsEvent {
     data object HideTimeDialog: CalculateTipsEvent()
     data object Back : CalculateTipsEvent()
     data object ClearAllTimes : CalculateTipsEvent()
+    data object SaveTimeDialog : CalculateTipsEvent()
 }

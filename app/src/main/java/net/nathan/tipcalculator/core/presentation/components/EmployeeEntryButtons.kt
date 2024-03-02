@@ -1,5 +1,6 @@
 package net.nathan.tipcalculator.core.presentation.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -7,12 +8,8 @@ import androidx.compose.material.icons.filled.CheckCircleOutline
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
@@ -44,15 +41,14 @@ fun CheckButton(
 }
 
 @Composable
-fun EmptyCircle(colour: Color, strokeWidth: Float = 9f){
+fun EmptyCircle(colour: Color){
     Canvas(
         modifier = Modifier.fillMaxSize(),
         onDraw = {
-            val radius = 41f
             drawCircle(
                 center = center,
-                radius = radius,
-                style = Stroke(width = strokeWidth),
+                radius = 15.dp.toPx(),
+                style = Stroke(width = 3.dp.toPx()),
                 color = colour
             )
     })
