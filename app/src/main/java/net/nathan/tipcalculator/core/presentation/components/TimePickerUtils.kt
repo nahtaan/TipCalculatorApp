@@ -132,8 +132,7 @@ fun TimePickerDialog(
                     Button(
                         onClick = {
                             onSave()
-                        },
-                        modifier = Modifier
+                        }
                     ){
                         Text(
                             text = TipStrings.CONFIRM

@@ -1,6 +1,7 @@
 package net.nathan.tipcalculator.core.util
 
 object ContentDescriptions{
+    const val IMPORT_EMPLOYEES = "Import Employees"
     const val BACK = "Back"
     const val LOADING_INDICATOR = "Loading"
     const val ADD_EMPLOYEE = "Add Employee"
@@ -15,6 +16,8 @@ object TipUseCaseStrings{
     const val INVALID_NAME = "Please ensure that the name is not empty!"
 }
 object TipStrings{
+    const val IMPORT_EXPLAIN = "To import entries, type their names seperated by commas and press confirm!"
+    const val IMPORT_VALUE = "Import Value"
     const val EMPLOYEE_DELETED = "Employee Entry has been deleted."
     const val UNDO = "Undo"
     const val EMPLOYEE_LIST = "Tip Calculator"

@@ -307,7 +307,12 @@ fun CalculateTipsScreen(
                                                     "&endTimeMinute=${state.endTimeMinute}"
                                         )
                                     }
-                                }
+                                },
+                                onCheckClick = {
+                                    viewModel.onEvent(CalculateTipsEvent.ToggleIsPaid(employee))
+                                },
+                                isChecked = state.paidEmployees[employee.id ?: -1] ?: false,
+                                checkColour = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         }
                     }

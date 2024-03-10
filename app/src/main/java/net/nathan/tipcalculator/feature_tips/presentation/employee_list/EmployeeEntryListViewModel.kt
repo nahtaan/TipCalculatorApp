@@ -10,6 +10,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import net.nathan.tipcalculator.feature_tips.data.di.IoDispatcher
+import net.nathan.tipcalculator.feature_tips.domain.model.EmployeeEntryItem
 import net.nathan.tipcalculator.feature_tips.domain.use_case.TipUseCases
 import javax.inject.Inject
 
@@ -75,6 +76,47 @@ class EmployeeEntryListViewModel @Inject constructor(
                     }
                     getEmployeeEntries()
                 }
+            }
+            EmployeeEntryListEvent.ShowImportDialog -> {
+                _state.value = _state.value.copy(
+                    showImportEmployeesDialog = true
+                )
+            }
+            is EmployeeEntryListEvent.ImportEmployeeStringChange -> {
+                _state.value = _state.value.copy(
+                    importEmployeeString = event.value
+                )
+            }
+            EmployeeEntryListEvent.ImportEmployees -> {
+                viewModelScope.launch {
+                    if(_state.value.importEmployeeString == ""){
+                        _state.value = _state.value.copy(
+                            showImportEmployeesDialog = false
+                        )
+                        return@launch;
+                    }
+                    val values = _state.value.importEmployeeString.split(" *, *".toRegex())
+                    for(name in values){
+                        tipUseCases.addEmployeeEntry(
+                            EmployeeEntryItem(
+                                name = name,
+                                hours = null,
+                                minutes = null,
+                                isSelected = false,
+                                id = null
+                            )
+                        )
+                    }
+                    _state.value = _state.value.copy(
+                        showImportEmployeesDialog = false
+                    )
+                    getEmployeeEntries()
+                }
+            }
+            EmployeeEntryListEvent.HideImportDialog -> {
+                _state.value = _state.value.copy(
+                    showImportEmployeesDialog = false
+                )
             }
         }
     }

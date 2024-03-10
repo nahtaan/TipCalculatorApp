@@ -6,10 +6,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.DeleteSweep
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -20,9 +22,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
@@ -67,7 +73,19 @@ fun EmployeeEntriesScreen(
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
                     actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
-                navigationIcon = {},
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            viewModel.onEvent(EmployeeEntryListEvent.ShowImportDialog)
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Download,
+                            contentDescription = ContentDescriptions.IMPORT_EMPLOYEES,
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                },
                 actions = {
                     CheckButton(
                         onCheckClick = {
@@ -114,9 +132,10 @@ fun EmployeeEntriesScreen(
                                 tint = Color.Black
                             )
                         }
-                        Divider(modifier = Modifier
-                            .fillMaxHeight(0.7f)
-                            .width(2.dp))
+                        VerticalDivider(
+                            thickness = 2.dp,
+                            modifier = Modifier.fillMaxHeight(0.7f)
+                        )
                         FloatingActionButton(
                             onClick = {
                                 navController.navigate(Screen.EmployeeAddEditScreen.route)
@@ -130,9 +149,10 @@ fun EmployeeEntriesScreen(
                                 tint = Color.Black
                             )
                         }
-                        Divider(modifier = Modifier
-                            .fillMaxHeight(0.7f)
-                            .width(2.dp))
+                        VerticalDivider(
+                            thickness = 2.dp,
+                            modifier = Modifier.fillMaxHeight(0.7f)
+                        )
                         FloatingActionButton(
                             onClick = {
                                 navController.navigate(Screen.CalculateTipsScreen.route)
@@ -154,7 +174,9 @@ fun EmployeeEntriesScreen(
     ) {_ ->
         Box(
             contentAlignment = Alignment.TopStart,
-            modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colorScheme.background)
+            modifier = Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.background)
         ){
             Column(
                 modifier = Modifier.fillMaxSize()
@@ -201,6 +223,64 @@ fun EmployeeEntriesScreen(
                         }
                         if(state.employeeEntryItems.indexOf(employee) == state.employeeEntryItems.size-1){
                             Spacer(modifier = Modifier.height(6.dp))
+                        }
+                    }
+                }
+            }
+            if(state.showImportEmployeesDialog){
+                Dialog(
+                    onDismissRequest = {
+                        viewModel.onEvent(EmployeeEntryListEvent.HideImportDialog)
+                    }
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .wrapContentHeight()
+                            .height(IntrinsicSize.Min),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = CardColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                            disabledContentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(10.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = TipStrings.IMPORT_EXPLAIN,
+                                style = MaterialTheme.typography.bodyLarge,
+                                textAlign = TextAlign.Center
+                            )
+                            OutlinedTextField(
+                                value = state.importEmployeeString,
+                                onValueChange = {
+                                    viewModel.onEvent(EmployeeEntryListEvent.ImportEmployeeStringChange(it))
+                                },
+                                textStyle = TextStyle(
+                                    fontSize = 25.sp,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                ),
+                                label = {
+                                    Text(TipStrings.IMPORT_VALUE)
+                                },
+                                singleLine = false,
+                                modifier = Modifier.padding(bottom = 10.dp),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    unfocusedBorderColor = MaterialTheme.colorScheme.secondary,
+                                    focusedBorderColor = MaterialTheme.colorScheme.primary
+                                )
+                            )
+                            Button(
+                                onClick = {
+                                    viewModel.onEvent(EmployeeEntryListEvent.ImportEmployees)
+                                }
+                            ) {
+                                Text(text = TipStrings.CONFIRM)
+                            }
                         }
                     }
                 }

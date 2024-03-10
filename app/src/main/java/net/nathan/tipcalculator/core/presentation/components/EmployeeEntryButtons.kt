@@ -32,10 +32,12 @@ fun CheckButton(
                 imageVector = Icons.Default.CheckCircleOutline,
                 contentDescription = ContentDescriptions.CHECK_BUTTON,
                 tint = colour,
-                modifier = modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize()
             )
         }else{
-            EmptyCircle(colour = colour)
+            EmptyCircle(
+                colour = colour
+            )
         }
     }
 }

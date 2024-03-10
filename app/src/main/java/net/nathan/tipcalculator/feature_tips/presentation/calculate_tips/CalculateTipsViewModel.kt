@@ -103,8 +103,23 @@ class CalculateTipsViewModel @Inject constructor(
                     showEndTimeDialog = false
                 )
             }
+            is CalculateTipsEvent.ToggleIsPaid -> {
+                viewModelScope.launch {
+                    val currentPaidStatus = _state.value.paidEmployees[event.employee.id ?: -1] ?: false
+                    val newPaidEmployees = _state.value.paidEmployees.toMutableMap()
+                    newPaidEmployees[event.employee.id ?: -1] = !currentPaidStatus
+                    _state.value = _state.value.copy(
+                        paidEmployees = newPaidEmployees
+                    )
+                }
+            }
         }
     }
+
+    fun getIsPaid(id: Int): Boolean{
+        return _state.value.paidEmployees[id] ?: false
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     fun updateEmployeeEntries(){
         getEmployeeEntryItemsJob?.cancel()
